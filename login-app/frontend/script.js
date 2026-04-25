@@ -1,4 +1,4 @@
-const API = "http://vegz.online:5000";
+const API = "http://vegz.online:api";
 
 // Toggle UI
 function showRegister() {
