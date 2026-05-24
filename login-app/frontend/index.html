@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #13131b;
+      --border:    #2a2a3a;
+      --accent:    #e8ff45;
+      --accent2:   #7b61ff;
+      --text:      #f0f0f5;
+      --muted:     #6b6b80;
+      --error:     #ff5f6d;
+      --success:   #00e5a0;
+      --radius:    14px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      overflow: hidden;
+    }
+
+    /* ── Background grid + glow ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: .35;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(123,97,255,.18) 0%, transparent 70%);
+      top: -150px; left: -150px;
+      pointer-events: none;
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .45s ease, transform .45s ease;
+    }
+    .page.hidden {
+      opacity: 0; pointer-events: none; transform: translateY(24px);
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      width: min(420px, 92vw);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) * 1.5);
+      padding: 42px 40px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04);
+      animation: slideUp .55s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    @keyframes slideUp {
+      from { opacity:0; transform: translateY(36px) scale(.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    /* accent stripe */
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 32px; right: 32px; height: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 0 0 4px 4px;
+    }
+
+    /* ── Brand ── */
+    .brand {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 32px;
+    }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 18px; letter-spacing: -.3px;
+    }
+
+    /* ── Heading ── */
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px; font-weight: 800; letter-spacing: -.5px;
+      line-height: 1.15; margin-bottom: 6px;
+    }
+    .subtitle {
+      color: var(--muted); font-size: 13.5px; margin-bottom: 30px;
+    }
+
+    /* ── Form ── */
+    .field { margin-bottom: 18px; }
+    label {
+      display: block; font-size: 12px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .8px;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      font-size: 15px; font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(123,97,255,.18);
+    }
+    input::placeholder { color: #3a3a50; }
+
+    /* ── Button ── */
+    .btn {
+      width: 100%; margin-top: 8px;
+      padding: 14px;
+      background: var(--accent);
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 15px; letter-spacing: .2px;
+      border: none; border-radius: var(--radius);
+      cursor: pointer;
+      transition: transform .15s, opacity .15s, box-shadow .15s;
+      box-shadow: 0 0 24px rgba(232,255,69,.25);
+    }
+    .btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(232,255,69,.35); }
+    .btn:active { transform: translateY(0); opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* ── Alert ── */
+    .alert {
+      padding: 11px 14px; border-radius: 9px;
+      font-size: 13.5px; margin-bottom: 16px;
+      display: none;
+    }
+    .alert.error   { background: rgba(255,95,109,.12); border: 1px solid rgba(255,95,109,.3); color: var(--error); }
+    .alert.success { background: rgba(0,229,160,.1);  border: 1px solid rgba(0,229,160,.3);  color: var(--success); }
+    .alert.show    { display: block; animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── Toggle link ── */
+    .toggle-link {
+      text-align: center; margin-top: 22px;
+      font-size: 13.5px; color: var(--muted);
+    }
+    .toggle-link a {
+      color: var(--accent); text-decoration: none; font-weight: 500;
+      cursor: pointer;
+    }
+    .toggle-link a:hover { text-decoration: underline; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid rgba(10,10,15,.4);
+      border-top-color: #0a0a0f;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Welcome Page ── */
+    .welcome-card {
+      text-align: center;
+      padding: 52px 44px 48px;
+    }
+    .avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 32px; font-weight: 800; color: #0a0a0f;
+      animation: popIn .5s cubic-bezier(.34,1.56,.64,1) .1s both;
+    }
+    @keyframes popIn {
+      from { transform: scale(0) rotate(-15deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    .welcome-tag {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 10px;
+      animation: fadeIn .4s ease .25s both;
+    }
+    .welcome-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px; font-weight: 800; letter-spacing: -.5px;
+      margin-bottom: 10px;
+      animation: fadeIn .4s ease .35s both;
+    }
+    .welcome-sub {
+      color: var(--muted); font-size: 14px; margin-bottom: 32px;
+      animation: fadeIn .4s ease .45s both;
+    }
+    .logout-btn {
+      display: inline-block; padding: 11px 28px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--muted); font-family: inherit; font-size: 13.5px;
+      background: transparent; cursor: pointer;
+      transition: border-color .2s, color .2s;
+      animation: fadeIn .4s ease .55s both;
+    }
+    .logout-btn:hover { border-color: var(--muted); color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- ── Login / Register Page ── -->
+<div class="page" id="authPage">
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <span class="brand-name">Vaultly</span>
+    </div>
+
+    <h1 id="formTitle">Sign in</h1>
+    <p class="subtitle" id="formSubtitle">Enter your credentials to continue.</p>
+
+    <div class="alert error" id="alertBox"></div>
+
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" placeholder="e.g. manoj" autocomplete="username" />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="handleSubmit()">Sign In</button>
+
+    <div class="toggle-link">
+      <span id="toggleText">Don't have an account?</span>
+      <a onclick="toggleMode()"> <span id="toggleAction">Register</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Welcome Page ── -->
+<div class="page hidden" id="welcomePage">
+  <div class="card welcome-card">
+    <div class="avatar" id="avatarLetter">M</div>
+    <div class="welcome-tag">Access Granted</div>
+    <div class="welcome-name" id="welcomeName">Welcome, Manoj!</div>
+    <div class="welcome-sub">You're successfully logged in.</div>
+    <button class="logout-btn" onclick="logout()">← Sign out</button>
+  </div>
+</div>
+
+<script>
+  // ── Config ────────────────────────────────────────────────
+  // In production this is served by Nginx; the API path is proxied.
+  const API_BASE = window.API_BASE || '';
+
+  // ── State ─────────────────────────────────────────────────
+  let isRegisterMode = false;
+
+  // ── Toggle login / register ───────────────────────────────
+  function toggleMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('formTitle').textContent     = isRegisterMode ? 'Create account' : 'Sign in';
+    document.getElementById('formSubtitle').textContent  = isRegisterMode ? 'Pick a username and password.' : 'Enter your credentials to continue.';
+    document.getElementById('submitBtn').textContent     = isRegisterMode ? 'Register' : 'Sign In';
+    document.getElementById('toggleText').textContent    = isRegisterMode ? 'Already have an account?' : "Don't have an account?";
+    document.getElementById('toggleAction').textContent  = isRegisterMode ? 'Sign in' : 'Register';
+    hideAlert();
+  }
+
+  // ── Submit ────────────────────────────────────────────────
+  async function handleSubmit() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const btn      = document.getElementById('submitBtn');
+
+    if (!username || !password) { showAlert('Please fill in all fields.'); return; }
+
+    btn.disabled   = true;
+    btn.innerHTML  = `<span class="spinner"></span>${isRegisterMode ? 'Registering…' : 'Signing in…'}`;
+
+    try {
+      const endpoint = isRegisterMode ? `${API_BASE}/api/register` : `${API_BASE}/api/login`;
+      const res  = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (isRegisterMode) {
+          showAlert('Account created! You can now sign in.', 'success');
+          setTimeout(() => { toggleMode(); hideAlert(); }, 1500);
+        } else {
+          showWelcome(data.username);
+        }
+      } else {
+        showAlert(data.message || 'Something went wrong.');
+      }
+    } catch (e) {
+      showAlert('Cannot reach the server. Please try again.');
+    } finally {
+      btn.disabled  = false;
+      btn.textContent = isRegisterMode ? 'Register' : 'Sign In';
+    }
+  }
+
+  // ── Welcome transition ────────────────────────────────────
+  function showWelcome(name) {
+    const display = name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById('welcomeName').textContent = `Welcome, ${display}!`;
+    document.getElementById('avatarLetter').textContent = name.charAt(0).toUpperCase();
+
+    document.getElementById('authPage').classList.add('hidden');
+    const wp = document.getElementById('welcomePage');
+    wp.classList.remove('hidden');
+    // Re-trigger animations
+    void wp.offsetWidth;
+    wp.querySelector('.card').style.animation = 'none';
+    void wp.querySelector('.card').offsetWidth;
+    wp.querySelector('.card').style.animation = '';
+  }
+
+  // ── Logout ────────────────────────────────────────────────
+  function logout() {
+    document.getElementById('welcomePage').classList.add('hidden');
+    document.getElementById('authPage').classList.remove('hidden');
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    hideAlert();
+  }
+
+  // ── Alerts ────────────────────────────────────────────────
+  function showAlert(msg, type = 'error') {
+    const box = document.getElementById('alertBox');
+    box.textContent = msg;
+    box.className = `alert ${type} show`;
+  }
+  function hideAlert() {
+    document.getElementById('alertBox').className = 'alert';
+  }
+
+  // ── Enter key ─────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSubmit();
+  });
+</script>
+</body>
+</html>
