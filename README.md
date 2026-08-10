@@ -13,7 +13,6 @@ A full-stack login application with:
 login-app/
 ├── .env                  ← secrets & config (DO NOT commit)
 ├── .gitignore
-├── docker-compose.yml    ← orchestrates all 3 services
 │
 ├── frontend/
 │   ├── index.html        ← login + welcome page (single-page)
@@ -34,13 +33,7 @@ login-app/
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
-- Docker Desktop (or Docker + Docker Compose)
 
-### 2. Start everything
-```bash
-cd login-app
-docker compose up --build
 ```
 
 ### 3. Open in browser
@@ -87,11 +80,3 @@ All secrets live in `.env`. Edit before deploying:
 - Nginx acts as a reverse-proxy — the Flask port is not exposed in production
 - Change `FLASK_SECRET_KEY` and all passwords before deploying publicly
 
----
-
-## 🧹 Tear Down
-
-```bash
-docker compose down          # stop containers
-docker compose down -v       # also delete MySQL data volume
-```
