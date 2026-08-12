@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: login-backend
+  namespace: login-app
+  labels:
+    app: login-backend
+
+spec:
+  replicas: 2
+
+  revisionHistoryLimit: 3
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: login-backend
+
+  template:
+    metadata:
+      labels:
+        app: login-backend
+
+    spec:
+      serviceAccountName: login-backend
+      automountServiceAccountToken: false
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: login-backend
+
+          image: ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/login-backend:BUILD_NUMBER
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+
+          env:
+            - name: FLASK_ENV
+              value: "production"
+
+          envFrom:
+            - secretRef:
+                name: login-backend-secret
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+
+            capabilities:
+              drop:
+                - ALL
+
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
