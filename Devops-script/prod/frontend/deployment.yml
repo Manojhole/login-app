@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: login-frontend
+  namespace: login-app
+
+  labels:
+    app: login-frontend
+    component: frontend
+
+spec:
+  replicas: 2
+
+  revisionHistoryLimit: 3
+
+  strategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: login-frontend
+
+  template:
+    metadata:
+      labels:
+        app: login-frontend
+        component: frontend
+
+    spec:
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+
+        - name: login-frontend
+
+          image: ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/login-frontend:BUILD_NUMBER
+
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+
+          resources:
+
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+          securityContext:
+
+            allowPrivilegeEscalation: false
+
+            capabilities:
+              drop:
+                - ALL
+
+          startupProbe:
+
+            httpGet:
+              path: /
+              port: http
+
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          readinessProbe:
+
+            httpGet:
+              path: /
+              port: http
+
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          livenessProbe:
+
+            httpGet:
+              path: /
+              port: http
+
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
