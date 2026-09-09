@@ -1,4 +1,4 @@
-name: Build and Push to ECR
+name: Build and Push All Images
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
 permissions:
   id-token: write
   contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: 605199373194.dkr.ecr.us-east-1.amazonaws.com
 
 jobs:
   build-and-push:
@@ -21,16 +25,43 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::605199373194:role/github-login-app-ecr
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image
+      # Backend
+      - name: Build Backend
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/login-app:${{ github.sha }} .
+          docker build \
+            -t $ECR_REGISTRY/login-app-backend:${{ github.sha }} \
+            ./backend
 
-      - name: Push Docker image
+      - name: Push Backend
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/login-app:${{ github.sha }}
+          docker push \
+            $ECR_REGISTRY/login-app-backend:${{ github.sha }}
+
+      # Frontend
+      - name: Build Frontend
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/login-app-frontend:${{ github.sha }} \
+            ./frontend
+
+      - name: Push Frontend
+        run: |
+          docker push \
+            $ECR_REGISTRY/login-app-frontend:${{ github.sha }}
+
+      # MySQL
+      - name: Build MySQL
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/login-app-mysql:${{ github.sha }} \
+            ./mysql-init
+
+      - name: Push MySQL
+        run: |
+          docker push \
+            $ECR_REGISTRY/login-app-mysql:${{ github.sha }}
