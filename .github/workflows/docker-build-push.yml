@@ -1,3 +1,4 @@
+```yaml
 name: Build and Push All Images
 
 on:
@@ -19,29 +20,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      # 1. Checkout source code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2. Authenticate to AWS using GitHub OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::605199373194:role/github-login-app-ecr
           aws-region: ${{ env.AWS_REGION }}
 
+      # 3. Login to Amazon ECR
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # 4. Build and Push Backend
       - name: Build and Push Backend
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/backend:${{ github.sha }} ./backend
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/backend:${{ github.sha }}
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:backend-${{ github.sha }} \
+            ./backend
 
+          docker push \
+            $ECR_REGISTRY/$ECR_REPOSITORY:backend-${{ github.sha }}
+
+      # 5. Build and Push Frontend
       - name: Build and Push Frontend
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/frontend:${{ github.sha }} ./frontend
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/frontend:${{ github.sha }}
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:frontend-${{ github.sha }} \
+            ./frontend
 
+          docker push \
+            $ECR_REGISTRY/$ECR_REPOSITORY:frontend-${{ github.sha }}
+
+      # 6. Build and Push MySQL
       - name: Build and Push MySQL
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY/mysql:${{ github.sha }} ./mysql-init
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY/mysql:${{ github.sha }}
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:mysql-${{ github.sha }} \
+            ./mysql-init
+
+          docker push \
+            $ECR_REGISTRY/$ECR_REPOSITORY:mysql-${{ github.sha }}
+```
