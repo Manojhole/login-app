@@ -64,4 +64,3 @@ jobs:
 
           docker push \
             $ECR_REGISTRY/$ECR_REPOSITORY:mysql-${{ github.sha }}
-```
