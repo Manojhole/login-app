@@ -4,7 +4,7 @@ A full-stack login application with:
 - **Frontend** — HTML/CSS/JS served by Nginx
 - **Backend** — Python Flask REST API (Gunicorn)
 - **Database** — MySQL 8 with bcrypt-hashed passwords
-
+it using github actions to build docker images and push it to ecr
 ---
 
 ## 📁 Project Structure
