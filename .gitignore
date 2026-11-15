@@ -1,0 +1,27 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+envfile
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local development and editor files
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/
+*.log
