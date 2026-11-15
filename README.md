@@ -1,46 +1,57 @@
-# Vegz Login & Signup Frontends
+# Vegz Frontend Applications
 
-Two independent Node.js/Express frontend applications in one repository.
+Five independent Node.js/Express frontend demos in one repository. Each app has its own Dockerfile, package.json, static frontend, and health endpoint.
 
 | App | Directory | Port | Hostname |
 |---|---|---:|---|
 | Login | login-page/ | 3000 | login.vegz.online |
 | Signup | signup-page/ | 3001 | signup.vegz.online |
+| Dashboard | dashboard-page/ | 3002 | dashboard.vegz.online |
+| Contact | contact-page/ | 3003 | contact.vegz.online |
+| Profile | profile-page/ | 3004 | profile.vegz.online |
 
-These are frontend demos only. Forms validate input in the browser and show a demo message; they do not create accounts, authenticate users, or store passwords.
+Demo limitation: these are frontend-only examples. Forms show demo messages and do not authenticate users, send contact messages, save profile changes, or store data. Do not enter real passwords or sensitive information.
 
 ## Run locally
-
+Example for the dashboard; repeat from the other app directories:
 ~~~sh
-cd login-page && npm install && npm start
-# In another terminal:
-cd signup-page && npm install && npm start
+cd dashboard-page
+npm install
+npm start
 ~~~
-
-Open http://localhost:3000 and http://localhost:3001.
+Open http://localhost:3002. Ports for all apps are listed above.
 
 ## Build and run with Docker
-
 ~~~sh
 docker build -t vegz-login ./login-page
 docker build -t vegz-signup ./signup-page
-docker run -d --name vegz-login -p 3000:3000 vegz-login
-docker run -d --name vegz-signup -p 3001:3001 vegz-signup
+docker build -t vegz-dashboard ./dashboard-page
+docker build -t vegz-contact ./contact-page
+docker build -t vegz-profile ./profile-page
+
+docker run -d --restart unless-stopped --name vegz-login -p 3000:3000 vegz-login
+docker run -d --restart unless-stopped --name vegz-signup -p 3001:3001 vegz-signup
+docker run -d --restart unless-stopped --name vegz-dashboard -p 3002:3002 vegz-dashboard
+docker run -d --restart unless-stopped --name vegz-contact -p 3003:3003 vegz-contact
+docker run -d --restart unless-stopped --name vegz-profile -p 3004:3004 vegz-profile
 ~~~
+Health check example: curl http://localhost:3002/health (replace the port for each app).
 
 ## EC2 + Application Load Balancer
+Run all five containers on one EC2 instance. Create five target groups, target type Instances, HTTP protocol, and matching app port. Use /health as the health check path.
 
-1. Run login on EC2 TCP 3000 and signup on TCP 3001.
-2. Create two target groups, target type Instances:
-   - vegz-login-tg: HTTP port 3000, health check path /.
-   - vegz-signup-tg: HTTP port 3001, health check path /.
-3. Register the EC2 instance in both target groups.
-4. Attach an internet-facing ALB. Listener 80 can redirect to 443. Listener 443 uses an ACM certificate covering both hostnames.
-5. Add HTTPS listener host-header rules:
-   - login.vegz.online → vegz-login-tg.
-   - signup.vegz.online → vegz-signup-tg.
-   - Default action: fixed response 404.
-6. Create DNS records login.vegz.online and signup.vegz.online pointing to the ALB (Route 53 ALIAS or your DNS provider's supported CNAME setup).
-7. EC2 security group: allow inbound 3000 and 3001 only from the ALB security group. Allow public 80/443 at the ALB. Do not expose app ports publicly.
+| Target group | Port | ALB host-header rule |
+|---|---:|---|
+| vegz-login-tg | 3000 | login.vegz.online |
+| vegz-signup-tg | 3001 | signup.vegz.online |
+| vegz-dashboard-tg | 3002 | dashboard.vegz.online |
+| vegz-contact-tg | 3003 | contact.vegz.online |
+| vegz-profile-tg | 3004 | profile.vegz.online |
 
-For production, add a real authentication backend or identity provider before collecting credentials.
+1. Register the same EC2 instance in all five target groups.
+2. Attach an internet-facing ALB. Listener 80 can redirect to 443; listener 443 should use an ACM certificate covering all five hostnames.
+3. Add HTTPS listener host-header rules mapping each hostname to its matching target group. Set a fixed-response 404 default action.
+4. Create DNS records for all five hostnames pointing to the ALB (Route 53 ALIAS or your DNS provider's supported CNAME setup).
+5. On the EC2 security group, allow TCP 3000–3004 only from the ALB security group. Allow public 80/443 at the ALB; do not expose app ports publicly.
+
+This repository update does not create AWS infrastructure or DNS records; configure those separately. For production, add a secure backend or identity provider before collecting credentials or personal data.
