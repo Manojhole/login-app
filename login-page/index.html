@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101828">
+  <title>Login | Vegz</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#10251d,#173d2b 55%,#285b3b);display:grid;place-items:center;padding:24px;color:#17251d}
+    .shell{width:min(100%,430px)}.brand{color:#fff;text-align:center;margin-bottom:22px;font-size:28px;font-weight:800;letter-spacing:-1px}.brand span{color:#a9e6a9}
+    .card{background:#fff;border-radius:22px;padding:36px;box-shadow:0 24px 70px #071b1280}.eyebrow{color:#32834b;font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;margin:0 0 10px}
+    h1{font-size:28px;margin:0 0 8px;letter-spacing:-.8px}.sub{color:#68756d;margin:0 0 28px;font-size:14px}
+    label{display:block;font-size:13px;font-weight:700;margin:17px 0 8px}.field{width:100%;border:1px solid #dce5de;border-radius:11px;padding:14px 15px;font-size:15px;outline:none;transition:.2s}.field:focus{border-color:#32834b;box-shadow:0 0 0 3px #32834b20}
+    .password-wrap{position:relative}.password-wrap .field{padding-right:64px}.toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:0;background:none;color:#32834b;font-weight:700;cursor:pointer}
+    .row{display:flex;justify-content:space-between;align-items:center;margin:17px 0 22px;font-size:13px}.remember{display:flex;gap:8px;align-items:center;color:#58665d}.remember input{accent-color:#32834b}
+    a{color:#32834b;text-decoration:none;font-weight:700}.submit{width:100%;border:0;border-radius:11px;background:#287a43;color:#fff;padding:15px;font-size:15px;font-weight:800;cursor:pointer}.submit:hover{background:#206638}
+    .message{min-height:20px;margin:14px 0 0;color:#b42318;font-size:13px}.foot{text-align:center;color:#fff9;font-size:12px;margin-top:20px}
+    @media(max-width:480px){.card{padding:28px 22px}h1{font-size:25px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="brand">vegz<span>.</span></div>
+    <section class="card" aria-labelledby="title">
+      <p class="eyebrow">Welcome back</p>
+      <h1 id="title">Sign in to your account</h1>
+      <p class="sub">Enter your details to continue to Vegz.</p>
+      <form id="loginForm" novalidate>
+        <label for="email">Email address</label>
+        <input class="field" id="email" name="email" type="email" placeholder="you@example.com" autocomplete="username" required>
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input class="field" id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required minlength="6">
+          <button class="toggle" type="button" id="togglePassword">Show</button>
+        </div>
+        <div class="row">
+          <label class="remember"><input type="checkbox" id="remember"> Remember me</label>
+          <a href="mailto:support@vegz.online?subject=Password%20reset">Forgot password?</a>
+        </div>
+        <button class="submit" type="submit">Sign in</button>
+        <p class="message" id="message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <p class="foot">© <span id="year"></span> Vegz. All rights reserved.</p>
+  </main>
+  <script>
+    const form=document.getElementById('loginForm');
+    const email=document.getElementById('email');
+    const password=document.getElementById('password');
+    const message=document.getElementById('message');
+    document.getElementById('year').textContent=new Date().getFullYear();
+    document.getElementById('togglePassword').addEventListener('click',function(){
+      const hidden=password.type==='password';password.type=hidden?'text':'password';this.textContent=hidden?'Hide':'Show';
+    });
+    form.addEventListener('submit',function(event){
+      event.preventDefault();message.style.color='#b42318';
+      if(!email.validity.valid){message.textContent='Please enter a valid email address.';email.focus();return;}
+      if(password.value.length<6){message.textContent='Password must be at least 6 characters.';password.focus();return;}
+      message.style.color='#287a43';
+      message.textContent='Frontend demo only — connect an authentication API to sign in.';
+    });
+  </script>
+</body>
+</html>
