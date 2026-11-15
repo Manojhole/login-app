@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b45"><title>Create account | Vegz</title><link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="panel">
+    <a class="brand" href="https://login.vegz.online">vegz<span>.</span></a>
+    <p class="eyebrow">JOIN VEGZ</p><h1>Create your account</h1>
+    <p class="muted">A fresh start begins here.</p>
+    <form id="signup-form">
+      <label for="name">Full name</label>
+      <input id="name" name="name" type="text" placeholder="Your full name" autocomplete="name" required>
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      <label for="password">Create password</label>
+      <input id="password" name="password" type="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8">
+      <button type="submit">Create account</button><p id="message" class="message" role="status" aria-live="polite"></p>
+    </form>
+    <p class="footer">Already registered? <a href="https://login.vegz.online">Login</a></p>
+  </main>
+  <script>
+    document.querySelector("#signup-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      document.querySelector("#message").textContent = "Frontend demo only. Connect a signup backend to create accounts.";
+    });
+  </script>
+</body></html>

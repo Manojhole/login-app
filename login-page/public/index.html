@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b45"><title>Login | Vegz</title><link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="panel">
+    <a class="brand" href="/">vegz<span>.</span></a>
+    <p class="eyebrow">WELCOME BACK</p><h1>Login to your account</h1>
+    <p class="muted">Sign in to continue to Vegz.</p>
+    <form id="login-form">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required minlength="6">
+      <button type="submit">Login</button><p id="message" class="message" role="status" aria-live="polite"></p>
+    </form>
+    <p class="footer">New to Vegz? <a href="https://signup.vegz.online">Create an account</a></p>
+  </main>
+  <script>
+    document.querySelector("#login-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      document.querySelector("#message").textContent = "Frontend demo only. Connect an authentication backend to enable login.";
+    });
+  </script>
+</body></html>
