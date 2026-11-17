@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RabbitMQ Producer</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172033;font:16px system-ui,sans-serif}
+main{max-width:760px;margin:48px auto;padding:0 20px}.card{background:white;border:1px solid #e4e9f1;border-radius:16px;padding:24px;box-shadow:0 8px 30px #1720330a}
+h1{margin:0 0 8px}.muted{color:#637083}.status{display:inline-block;padding:5px 10px;border-radius:99px;background:#fff3d6;color:#8a5a00;font-size:13px}
+label{display:block;font-weight:600;margin:22px 0 8px}textarea{width:100%;min-height:110px;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit;resize:vertical}
+button{margin-top:14px;background:#2563eb;color:white;border:0;border-radius:9px;padding:12px 18px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f7fa;border-radius:9px;padding:14px;min-height:54px}.links{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap}
+</style></head>
+<body><main><section class="card">
+<h1>Message Producer</h1><p class="muted">Publish a message to the RabbitMQ <code>demo.jobs</code> queue.</p>
+<p>Broker status: <span id="status" class="status">Checking…</span></p>
+<form id="form"><label for="message">Message</label><textarea id="message" maxlength="500" required placeholder="Example: Prepare order #101"></textarea><button id="send" type="submit">Publish message</button></form>
+<h3>Last publish result</h3><pre id="result">No messages sent yet.</pre>
+<div class="links"><a href="http://localhost:15672" target="_blank" rel="noreferrer">RabbitMQ Management</a><a href="http://localhost:3001" target="_blank" rel="noreferrer">Consumer dashboard</a></div>
+</section></main>
+<script>
+const statusEl=document.getElementById("status"),form=document.getElementById("form"),send=document.getElementById("send"),result=document.getElementById("result");
+async function health(){try{const r=await fetch("/api/health");const d=await r.json();statusEl.textContent=d.status;statusEl.style.background=r.ok?"#dcfce7":"#fff3d6";statusEl.style.color=r.ok?"#166534":"#8a5a00"}catch{statusEl.textContent="Unavailable"}}
+form.addEventListener("submit",async e=>{e.preventDefault();send.disabled=true;result.textContent="Publishing…";try{const r=await fetch("/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:document.getElementById("message").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Publish failed");result.textContent="Published successfully!\n"+JSON.stringify(d.job,null,2);document.getElementById("message").value=""}catch(err){result.textContent="Error: "+err.message}finally{send.disabled=false;health()}});
+health();setInterval(health,5000);
+</script></body></html>

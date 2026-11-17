@@ -1,0 +1,9 @@
+{
+  "name": "rabbitmq-demo-producer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web producer for the RabbitMQ learning demo",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "amqplib": "^0.10.5", "express": "^4.21.2" }
+}

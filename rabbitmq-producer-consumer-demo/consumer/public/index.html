@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RabbitMQ Consumer Worker</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172033;font:16px system-ui,sans-serif}
+main{max-width:900px;margin:42px auto;padding:0 20px}.card{background:white;border:1px solid #e4e9f1;border-radius:16px;padding:24px;box-shadow:0 8px 30px #1720330a}
+h1{margin:0 0 8px}.muted{color:#637083}.pill{display:inline-block;padding:5px 10px;border-radius:99px;background:#e2e8f0;color:#334155;font-size:13px}
+.green{background:#dcfce7;color:#166534}.yellow{background:#fef3c7;color:#92400e}.red{background:#fee2e2;color:#991b1b}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.metric{background:#f7f9fc;padding:15px;border-radius:10px}.metric strong{display:block;font-size:25px}
+.job{border:1px solid #e5eaf1;border-radius:10px;padding:14px;margin:10px 0}.jobtop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.bar{height:9px;background:#e2e8f0;border-radius:9px;overflow:hidden;margin-top:12px}.fill{height:100%;background:#2563eb;width:0;transition:width .4s}
+small{color:#637083}a{display:inline-block;margin-top:16px}@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main><section class="card">
+<h1>Consumer / Worker Dashboard</h1><p class="muted">The worker receives one job at a time, simulates 60 seconds of work, then ACKs it to RabbitMQ.</p>
+<p>Worker status: <span id="status" class="pill">Checking…</span></p>
+<div class="grid"><div class="metric"><small>Queue depth</small><strong id="waiting">Open RabbitMQ UI</strong></div><div class="metric"><small>Processing</small><strong id="processing">—</strong></div><div class="metric"><small>Completed in this session</small><strong id="completed">0</strong></div></div>
+<h2>Recent messages</h2><div id="jobs" class="muted">Waiting for messages…</div>
+<a href="http://localhost:3000">← Back to producer</a>
+</section></main>
+<script>
+const jobsEl=document.getElementById("jobs");
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function render(data){
+ const list=data.jobs||[],active=list.find(j=>j.status==="processing");
+ document.getElementById("processing").textContent=active?"1":"0";
+ document.getElementById("completed").textContent=list.filter(j=>j.status==="completed").length;
+ jobsEl.innerHTML=list.length?list.map(j=>{
+  const duration=j.durationMs||60000,elapsed=j.startedAt?Date.now()-new Date(j.startedAt).getTime():0;
+  const pct=j.status==="completed"?100:j.status==="processing"?Math.min(99,Math.floor(elapsed/duration*100)):0;
+  const remain=j.status==="processing"?Math.max(0,Math.ceil((duration-elapsed)/1000)):0;
+  const cls=j.status==="completed"?"green":j.status==="processing"?"yellow":j.status==="failed"?"red":"";
+  return '<article class="job"><div class="jobtop"><strong>'+esc(j.message)+'</strong><span class="pill '+cls+'">'+esc(j.status)+'</span></div><small>ID: '+esc(j.id)+'</small>'+(j.status==="processing"?'<div class="bar"><div class="fill" style="width:'+pct+'%"></div></div><small>'+remain+' seconds remaining (approx.)</small>':j.completedAt?'<br><small>Completed: '+new Date(j.completedAt).toLocaleTimeString()+'</small>':'')+'</article>';
+ }).join(""):'No messages received yet. Publish one from the producer dashboard.';
+}
+async function refresh(){try{const [hr,jr]=await Promise.all([fetch("/api/health"),fetch("/api/jobs")]);const h=await hr.json(),d=await jr.json(),s=document.getElementById("status");s.textContent=h.status;s.className="pill "+(hr.ok?"green":"yellow");render(d)}catch{document.getElementById("status").textContent="Unavailable"}}
+refresh();setInterval(refresh,1000);
+</script></body></html>
